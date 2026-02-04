@@ -1,0 +1,107 @@
+---
+# --------------------------------------------------------------------------
+# HEADLESS SERVICE
+# Required for StatefulSet to provide stable DNS identities (e.g. mysql-db-0.mysql-svc)
+# --------------------------------------------------------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-svc
+  labels:
+    app: mysql
+spec:
+  clusterIP: None # Headless: no virtual IP, direct pod DNS resolution
+  ports:
+    - port: 3306
+      targetPort: 3306
+      name: mysql
+  selector:
+    app: mysql
+---
+# --------------------------------------------------------------------------
+# STATEFULSET FOR MYSQL
+# Ordered deployment, stable pod names, per-pod PVCs
+# --------------------------------------------------------------------------
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql-db
+  labels:
+    app: mysql
+spec:
+  serviceName: mysql-svc # Must match the headless service name
+  replicas: 3 # 3 for basic primary + 2 replicas (needs replication config)
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+        version: v8.0
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: mysql-container
+          image: mysql:8.0.35
+          ports:
+            - containerPort: 3306
+              name: mysql
+          env:
+            - name: MYSQL_REPLICATION_MODE
+              value: "primary" # Note: only pod-0 should be primary; replicas need dynamic config
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: DB_PASSWORD
+            - name: MYSQL_DATABASE
+              value: "ayogyafirst"
+          livenessProbe:
+            exec:
+              command:
+                - mysqladmin
+                - ping
+                - -h
+                - localhost
+                - -u
+                - root
+                - -p${MYSQL_ROOT_PASSWORD}
+                - --silent
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command:
+                - mysqladmin
+                - ping
+                - -h
+                - localhost
+                - -u
+                - root
+                - -p${MYSQL_ROOT_PASSWORD}
+                - --silent
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+          volumeMounts:
+            - name: mysql-storage
+              mountPath: /var/lib/mysql
+  volumeClaimTemplates:
+    - metadata:
+        name: mysql-storage # Must match volumeMount name
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: ebs-sc # Change if your EKS storage class is different (e.g. gp3)
+        resources:
+          requests:
+            storage: 10Gi
