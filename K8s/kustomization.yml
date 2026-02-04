@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: arogya
+
+resources:
+  - db-ds.yml
+  - secrets-configmap.yml
+  - discovery-server-ds.yml
+  - gateway-ds.yml
+  - patient-ds.yml
+  - doctor-ds.yml
+  - pharmacy-ds.yml
+  - appointment-ds.yml
+  - medical-records-ds.yml
+  - insurance-ds.yml
+  - frontend-ds.yml

@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  labels:
+    app: frontend
+spec:
+  replicas: 1 # Adjust as needed
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend-container
+          image: 17rj/argogyafirst-frontend:latest# Replace with your frontend image
+          ports:
+            - containerPort: 80
+          env:
+            - name: VITE_API_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: ecommerce-config
+                  key: VITE_API_URL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  labels:
+    app: frontend
+spec:
+  selector:
+    app: frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: NodePort
