@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: appointment-service
-          image: 17rj/argogyafirst-appointment:latest
+          image: 17rj/arogya-appointment-service:latest
           ports:
             - containerPort: 8084
           env:

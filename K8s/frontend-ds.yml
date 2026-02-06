@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: frontend-container
-          image: 17rj/argogyafirst-frontend:latest# Replace with your frontend image
+          image: 17rj/arogya-frontend:latest# Replace with your frontend image
           ports:
             - containerPort: 80
           env:
