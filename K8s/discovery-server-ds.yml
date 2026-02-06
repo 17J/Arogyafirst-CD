@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: discovery-server
-          image: 17rj/arogyafirst-discovery:latest # ← change to your actual image
+          image: 17rj/arogya-discovery-server:latest # ← change to your actual image
           imagePullPolicy: Always
           ports:
             - containerPort: 8761

@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: insurance-service
-          image: 17rj/argogyafirst-insurance:latest
+          image: 17rj/arogya-insurance-service:latest
           ports:
             - containerPort: 8086
           env:

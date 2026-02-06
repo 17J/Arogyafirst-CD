@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: gateway-service
-          image: 17rj/arogyafirst-gateway:latest
+          image: 17rj/arogya-gateway-service:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
